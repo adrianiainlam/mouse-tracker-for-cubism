@@ -14,7 +14,8 @@ It is not part of the SDK itself, and is not affiliated in any way with Live2D
 Inc. The Live2D® Cubism SDK belongs solely to Live2D Inc. You will need to
 agree to Live2D Inc.'s license agreements to use the Live2D® Cubism SDK.*
 
-<!-- TODO maybe make a demo video? -->
+Video demo (comparing Mouse Tracker with Facial Landmarks, testing on OBS):
+<https://www.youtube.com/watch?v=MA7H3v9dtxM>
 
 ## Supporting environments
 
@@ -37,7 +38,7 @@ if you don't have C++17 support.
 
        libxdo-dev libpulse-dev libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libglu1-mesa-dev
 
-2. Clone this repository including its submodule (dlib)
+2. Clone this repository
 
        git clone https://github.com/adrianiainlam/mouse-tracker-for-cubism.git
 
