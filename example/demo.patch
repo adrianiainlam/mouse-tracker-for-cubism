@@ -1,6 +1,6 @@
 diff -pruN --exclude build ./demo_clean/CMakeLists.txt ./demo_dev/CMakeLists.txt
---- ./demo_clean/CMakeLists.txt	2020-09-27 17:43:12.069477246 +0100
-+++ ./demo_dev/CMakeLists.txt	2020-07-11 22:52:49.099117981 +0100
+--- ./demo_clean/CMakeLists.txt	2020-10-02 02:01:04.825787688 +0100
++++ ./demo_dev/CMakeLists.txt	2020-10-01 23:29:15.530233484 +0100
 @@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16)
  # Set app name.
  set(APP_NAME Demo)
@@ -23,8 +23,8 @@ diff -pruN --exclude build ./demo_clean/CMakeLists.txt ./demo_dev/CMakeLists.txt
  # Find opengl libraries.
  find_package(OpenGL REQUIRED)
  
-+# Add FacialLandmarksForCubism
-+add_subdirectory(../.. FacialLandmarksForCubism_build)
++# Add MouseTrackerForCubism
++add_subdirectory(../.. MouseTrackerForCubism_build)
 +
  # Make executable app.
  add_executable(${APP_NAME})
@@ -33,7 +33,7 @@ diff -pruN --exclude build ./demo_clean/CMakeLists.txt ./demo_dev/CMakeLists.txt
    Framework
    glfw
    ${OPENGL_LIBRARIES}
-+  FacialLandmarksForCubism
++  MouseTrackerForCubism
 +  stdc++fs
  )
  # Specify include directories.
@@ -42,39 +42,18 @@ diff -pruN --exclude build ./demo_clean/CMakeLists.txt ./demo_dev/CMakeLists.txt
  
  # Copy resource directory to build directory.
  add_custom_command(
-@@ -86,6 +91,17 @@ add_custom_command(
-       copy_directory ${RES_PATH} $<TARGET_FILE_DIR:${APP_NAME}>/Resources
- )
- 
-+# Copy shape predictor trained dataset to build directory
-+set(DLIB_SHAPE_PREDICTOR_DATA ${CMAKE_CURRENT_SOURCE_DIR}/../shape_predictor_68_face_landmarks.dat
-+    CACHE FILEPATH "Path to dlib shape predictor trained dataset")
-+add_custom_command(
-+  TARGET ${APP_NAME}
-+  POST_BUILD
-+  COMMAND
-+    ${CMAKE_COMMAND} -E
-+      copy ${DLIB_SHAPE_PREDICTOR_DATA} $<TARGET_FILE_DIR:${APP_NAME}>/
-+)
-+
- # You can change target that renderer draws by enabling following definition.
- #
- # * USE_RENDER_TARGET
 diff -pruN --exclude build ./demo_clean/scripts/make_gcc ./demo_dev/scripts/make_gcc
---- ./demo_clean/scripts/make_gcc	2020-09-27 17:43:12.069477246 +0100
-+++ ./demo_dev/scripts/make_gcc	2020-07-14 15:33:09.865020790 +0100
-@@ -9,5 +9,6 @@ BUILD_PATH=$SCRIPT_PATH/../build/make_gc
- # Run CMake.
+--- ./demo_clean/scripts/make_gcc	2020-10-02 02:01:04.825787688 +0100
++++ ./demo_dev/scripts/make_gcc	2020-10-01 23:43:42.213875065 +0100
+@@ -10,4 +10,4 @@ BUILD_PATH=$SCRIPT_PATH/../build/make_gc
  cmake -S "$CMAKE_PATH" \
    -B "$BUILD_PATH" \
--  -D CMAKE_BUILD_TYPE=Release
+   -D CMAKE_BUILD_TYPE=Release
 -cd "$BUILD_PATH" && make
-+  -D CMAKE_BUILD_TYPE=Release \
-+  -D USE_AVX_INSTRUCTIONS=1
 +cd "$BUILD_PATH" && make -j4
 diff -pruN --exclude build ./demo_clean/src/CMakeLists.txt ./demo_dev/src/CMakeLists.txt
---- ./demo_clean/src/CMakeLists.txt	2020-09-27 17:43:12.081477263 +0100
-+++ ./demo_dev/src/CMakeLists.txt	2020-07-11 17:39:18.358435702 +0100
+--- ./demo_clean/src/CMakeLists.txt	2020-10-02 02:01:04.829787750 +0100
++++ ./demo_dev/src/CMakeLists.txt	2020-10-01 22:47:24.842846271 +0100
 @@ -19,6 +19,4 @@ target_sources(${APP_NAME}
      ${CMAKE_CURRENT_SOURCE_DIR}/LAppView.cpp
      ${CMAKE_CURRENT_SOURCE_DIR}/LAppView.hpp
@@ -83,8 +62,8 @@ diff -pruN --exclude build ./demo_clean/src/CMakeLists.txt ./demo_dev/src/CMakeL
 -    ${CMAKE_CURRENT_SOURCE_DIR}/TouchManager.hpp
  )
 diff -pruN --exclude build ./demo_clean/src/LAppDelegate.cpp ./demo_dev/src/LAppDelegate.cpp
---- ./demo_clean/src/LAppDelegate.cpp	2020-09-27 17:43:12.081477263 +0100
-+++ ./demo_dev/src/LAppDelegate.cpp	2020-07-11 17:35:02.414902548 +0100
+--- ./demo_clean/src/LAppDelegate.cpp	2020-10-02 02:01:04.829787750 +0100
++++ ./demo_dev/src/LAppDelegate.cpp	2020-10-01 22:47:24.698848890 +0100
 @@ -45,7 +45,8 @@ void LAppDelegate::ReleaseInstance()
      s_instance = NULL;
  }
@@ -213,8 +192,8 @@ diff -pruN --exclude build ./demo_clean/src/LAppDelegate.cpp ./demo_dev/src/LApp
  
  Csm::csmVector<string> LAppDelegate::Split(const std::string& baseString, char delimiter)
 diff -pruN --exclude build ./demo_clean/src/LAppDelegate.hpp ./demo_dev/src/LAppDelegate.hpp
---- ./demo_clean/src/LAppDelegate.hpp	2020-09-27 17:43:12.081477263 +0100
-+++ ./demo_dev/src/LAppDelegate.hpp	2020-07-11 17:34:40.778602504 +0100
+--- ./demo_clean/src/LAppDelegate.hpp	2020-10-02 02:01:04.829787750 +0100
++++ ./demo_dev/src/LAppDelegate.hpp	2020-10-01 22:47:24.842846271 +0100
 @@ -40,7 +40,8 @@ public:
      /**
      * @brief   APPに必要なものを初期化する。
@@ -289,8 +268,8 @@ diff -pruN --exclude build ./demo_clean/src/LAppDelegate.hpp ./demo_dev/src/LApp
 -
 -};
 diff -pruN --exclude build ./demo_clean/src/LAppLive2DManager.cpp ./demo_dev/src/LAppLive2DManager.cpp
---- ./demo_clean/src/LAppLive2DManager.cpp	2020-09-27 17:43:12.081477263 +0100
-+++ ./demo_dev/src/LAppLive2DManager.cpp	2020-07-11 23:20:11.548419176 +0100
+--- ./demo_clean/src/LAppLive2DManager.cpp	2020-10-02 02:01:04.829787750 +0100
++++ ./demo_dev/src/LAppLive2DManager.cpp	2020-10-02 02:00:49.961556700 +0100
 @@ -52,9 +52,10 @@ void LAppLive2DManager::ReleaseInstance(
  
  LAppLive2DManager::LAppLive2DManager()
@@ -377,11 +356,11 @@ diff -pruN --exclude build ./demo_clean/src/LAppLive2DManager.cpp ./demo_dev/src
      return _models.GetSize();
  }
 +
-+void LAppLive2DManager::SetFacialLandmarkDetector(FacialLandmarkDetector *detector)
++void LAppLive2DManager::SetTracker(MouseCursorTracker *tracker)
 +{
 +    for (auto it = _models.Begin(); it != _models.End(); ++it)
 +    {
-+        (*it)->SetFacialLandmarkDetector(detector);
++        (*it)->SetTracker(tracker);
 +    }
 +}
 +
@@ -394,8 +373,8 @@ diff -pruN --exclude build ./demo_clean/src/LAppLive2DManager.cpp ./demo_dev/src
 +    _translateY = translateY;
 +}
 diff -pruN --exclude build ./demo_clean/src/LAppLive2DManager.hpp ./demo_dev/src/LAppLive2DManager.hpp
---- ./demo_clean/src/LAppLive2DManager.hpp	2020-09-27 17:43:12.069477246 +0100
-+++ ./demo_dev/src/LAppLive2DManager.hpp	2020-07-11 23:21:17.969484538 +0100
+--- ./demo_clean/src/LAppLive2DManager.hpp	2020-10-02 02:01:04.825787688 +0100
++++ ./demo_dev/src/LAppLive2DManager.hpp	2020-10-01 23:36:24.583055381 +0100
 @@ -6,12 +6,15 @@
   */
  #pragma once
@@ -407,7 +386,7 @@ diff -pruN --exclude build ./demo_clean/src/LAppLive2DManager.hpp ./demo_dev/src
  
  class LAppModel;
  
-+class FacialLandmarkDetector;
++class MouseCursorTracker;
 +
  /**
  * @brief サンプルアプリケーションにおいてCubismModelを管理するクラス<br>
@@ -440,11 +419,11 @@ diff -pruN --exclude build ./demo_clean/src/LAppLive2DManager.hpp ./demo_dev/src
      Csm::csmUint32 GetModelNum() const;
  
 +    /**
-+     * @brief Set the pointer to the FacialLandmarkDetector instance
++     * @brief Set the pointer to the MouseCursorTracker instance
 +     *
-+     * @param[in] detector : Pointer to FacialLandmarkDetector instance
++     * @param[in] tracker : Pointer to MouseCursorTracker instance
 +     */
-+    void SetFacialLandmarkDetector(FacialLandmarkDetector *detector);
++    void SetTracker(MouseCursorTracker *tracker);
 +
 +    /**
 +     * @brief Set projection scale factor and translation parameters
@@ -471,18 +450,26 @@ diff -pruN --exclude build ./demo_clean/src/LAppLive2DManager.hpp ./demo_dev/src
 +    float _translateY;
  };
 diff -pruN --exclude build ./demo_clean/src/LAppModel.cpp ./demo_dev/src/LAppModel.cpp
---- ./demo_clean/src/LAppModel.cpp	2020-09-27 17:43:12.069477246 +0100
-+++ ./demo_dev/src/LAppModel.cpp	2020-09-27 17:40:16.401166244 +0100
+--- ./demo_clean/src/LAppModel.cpp	2020-10-02 02:01:04.825787688 +0100
++++ ./demo_dev/src/LAppModel.cpp	2020-10-01 23:34:43.482626010 +0100
 @@ -21,6 +21,8 @@
  #include "LAppTextureManager.hpp"
  #include "LAppDelegate.hpp"
  
-+#include "facial_landmark_detector.h"
++#include "mouse_cursor_tracker.h"
 +
  using namespace Live2D::Cubism::Framework;
  using namespace Live2D::Cubism::Framework::DefaultParameterId;
  using namespace LAppDefine;
-@@ -128,30 +130,6 @@ void LAppModel::SetupModel(ICubismModelS
+@@ -49,6 +51,7 @@ LAppModel::LAppModel()
+     : CubismUserModel()
+     , _modelSetting(NULL)
+     , _userTimeSeconds(0.0f)
++    , _tracker(nullptr)
+ {
+     if (DebugLogEnable)
+     {
+@@ -128,30 +131,6 @@ void LAppModel::SetupModel(ICubismModelS
          DeleteBuffer(buffer, path.GetRawString());
      }
  
@@ -513,23 +500,7 @@ diff -pruN --exclude build ./demo_clean/src/LAppModel.cpp ./demo_dev/src/LAppMod
      //Physics
      if (strcmp(_modelSetting->GetPhysicsFileName(), "") != 0)
      {
-@@ -214,15 +192,6 @@ void LAppModel::SetupModel(ICubismModelS
-         }
-     }
- 
--    // LipSyncIds
--    {
--        csmInt32 lipSyncIdCount = _modelSetting->GetLipSyncParameterCount();
--        for (csmInt32 i = 0; i < lipSyncIdCount; ++i)
--        {
--            _lipSyncIds.PushBack(_modelSetting->GetLipSyncParameterId(i));
--        }
--    }
--
-     //Layout
-     csmMap<csmString, csmFloat32> layout;
-     _modelSetting->GetLayoutMap(layout);
-@@ -335,59 +304,57 @@ void LAppModel::Update()
+@@ -335,59 +314,72 @@ void LAppModel::Update()
      const csmFloat32 deltaTimeSeconds = LAppPal::GetDeltaTime();
      _userTimeSeconds += deltaTimeSeconds;
  
@@ -543,19 +514,19 @@ diff -pruN --exclude build ./demo_clean/src/LAppModel.cpp ./demo_dev/src/LAppMod
 -    //-----------------------------------------------------------------
 -    _model->LoadParameters(); // 前回セーブされた状態をロード
 -    if (_motionManager->IsFinished())
--    {
++    if (_tracker)
+     {
 -        // モーションの再生がない場合、待機モーションの中からランダムで再生する
 -        StartRandomMotion(MotionGroupIdle, PriorityIdle);
 -    }
 -    else
-+    if (_detector)
-     {
+-    {
 -        motionUpdated = _motionManager->UpdateMotion(_model, deltaTimeSeconds); // モーションを更新
 -    }
 -    _model->SaveParameters(); // 状態を保存
 -    //-----------------------------------------------------------------
 +        auto idMan = CubismFramework::GetIdManager();
-+        auto params = _detector->getParams();
++        auto params = _tracker->getParams();
  
 -    // まばたき
 -    if (!motionUpdated)
@@ -572,34 +543,22 @@ diff -pruN --exclude build ./demo_clean/src/LAppModel.cpp ./demo_dev/src/LAppMod
 +            StartRandomMotion(MotionGroupIdle, PriorityIdle);
          }
 -    }
--
--    if (_expressionManager != NULL)
--    {
--        _expressionManager->UpdateMotion(_model, deltaTimeSeconds); // 表情でパラメータ更新（相対変化）
--    }
--
--    //ドラッグによる変化
--    //ドラッグによる顔の向きの調整
--    _model->AddParameterValue(_idParamAngleX, _dragX * 30); // -30から30の値を加える
--    _model->AddParameterValue(_idParamAngleY, _dragY * 30);
--    _model->AddParameterValue(_idParamAngleZ, _dragX * _dragY * -30);
--
--    //ドラッグによる体の向きの調整
--    _model->AddParameterValue(_idParamBodyAngleX, _dragX * 10); // -10から10の値を加える
 +        else
 +        {
 +            _motionManager->UpdateMotion(_model, deltaTimeSeconds); // モーションを更新
 +        }
 +        _model->SaveParameters(); // 状態を保存
  
--    //ドラッグによる目の向きの調整
--    _model->AddParameterValue(_idParamEyeBallX, _dragX); // -1から1の値を加える
--    _model->AddParameterValue(_idParamEyeBallY, _dragY);
- 
--    // 呼吸など
--    if (_breath != NULL)
+-    if (_expressionManager != NULL)
 -    {
--        _breath->UpdateParameters(_model, deltaTimeSeconds);
+-        _expressionManager->UpdateMotion(_model, deltaTimeSeconds); // 表情でパラメータ更新（相対変化）
+-    }
+ 
+-    //ドラッグによる変化
+-    //ドラッグによる顔の向きの調整
+-    _model->AddParameterValue(_idParamAngleX, _dragX * 30); // -30から30の値を加える
+-    _model->AddParameterValue(_idParamAngleY, _dragY * 30);
+-    _model->AddParameterValue(_idParamAngleZ, _dragX * _dragY * -30);
 +        if (params.autoBlink && _eyeBlink)
 +        {
 +            _eyeBlink->UpdateParameters(_model, deltaTimeSeconds);
@@ -611,10 +570,34 @@ diff -pruN --exclude build ./demo_clean/src/LAppModel.cpp ./demo_dev/src/LAppMod
 +            _model->SetParameterValue(idMan->GetId("ParamEyeROpen"),
 +                                      params.rightEyeOpenness);
 +        }
+ 
+-    //ドラッグによる体の向きの調整
+-    _model->AddParameterValue(_idParamBodyAngleX, _dragX * 10); // -10から10の値を加える
 +        _model->SetParameterValue(idMan->GetId("ParamMouthForm"),
 +                                  params.mouthForm);
-+        _model->SetParameterValue(idMan->GetId("ParamMouthOpenY"),
-+                                  params.mouthOpenness);
+ 
+-    //ドラッグによる目の向きの調整
+-    _model->AddParameterValue(_idParamEyeBallX, _dragX); // -1から1の値を加える
+-    _model->AddParameterValue(_idParamEyeBallY, _dragY);
++        if (params.useLipSync && _lipSync)
++        {
++            csmFloat32 value = params.lipSyncParam; // 0 to 1
+ 
+-    // 呼吸など
+-    if (_breath != NULL)
+-    {
+-        _breath->UpdateParameters(_model, deltaTimeSeconds);
++            for (csmUint32 i = 0; i < _lipSyncIds.GetSize(); ++i)
++            {
++                _model->AddParameterValue(_lipSyncIds[i], value, 0.8f);
++            }
++        }
++        else
++        {
++            _model->SetParameterValue(idMan->GetId("ParamMouthOpenY"),
++                                      params.mouthOpenness);
++        }
++
 +        _model->SetParameterValue(idMan->GetId("ParamEyeLSmile"),
 +                                  params.leftEyeSmile);
 +        _model->SetParameterValue(idMan->GetId("ParamEyeRSmile"),
@@ -634,7 +617,7 @@ diff -pruN --exclude build ./demo_clean/src/LAppModel.cpp ./demo_dev/src/LAppMod
      }
  
      // 物理演算の設定
-@@ -396,17 +363,6 @@ void LAppModel::Update()
+@@ -396,17 +388,6 @@ void LAppModel::Update()
          _physics->Evaluate(_model, deltaTimeSeconds);
      }
  
@@ -652,24 +635,24 @@ diff -pruN --exclude build ./demo_clean/src/LAppModel.cpp ./demo_dev/src/LAppMod
      // ポーズの設定
      if (_pose != NULL)
      {
-@@ -626,3 +582,9 @@ Csm::Rendering::CubismOffscreenFrame_Ope
+@@ -626,3 +607,9 @@ Csm::Rendering::CubismOffscreenFrame_Ope
  {
      return _renderBuffer;
  }
 +
-+void LAppModel::SetFacialLandmarkDetector(FacialLandmarkDetector *detector)
++void LAppModel::SetTracker(MouseCursorTracker *tracker)
 +{
-+    _detector = detector;
++    _tracker = tracker;
 +}
 +
 diff -pruN --exclude build ./demo_clean/src/LAppModel.hpp ./demo_dev/src/LAppModel.hpp
---- ./demo_clean/src/LAppModel.hpp	2020-09-27 17:43:12.081477263 +0100
-+++ ./demo_dev/src/LAppModel.hpp	2020-07-11 15:40:18.977286166 +0100
+--- ./demo_clean/src/LAppModel.hpp	2020-10-02 02:01:04.829787750 +0100
++++ ./demo_dev/src/LAppModel.hpp	2020-10-01 23:35:39.254849094 +0100
 @@ -13,6 +13,7 @@
  #include <Type/csmRectF.hpp>
  #include <Rendering/OpenGL/CubismOffscreenSurface_OpenGLES2.hpp>
  
-+#include "facial_landmark_detector.h"
++#include "mouse_cursor_tracker.h"
  
  /**
   * @brief ユーザーが実際に使用するモデルの実装クラス<br>
@@ -678,11 +661,11 @@ diff -pruN --exclude build ./demo_clean/src/LAppModel.hpp ./demo_dev/src/LAppMod
      Csm::Rendering::CubismOffscreenFrame_OpenGLES2& GetRenderBuffer();
  
 +    /**
-+     * @brief Set the pointer to the FacialLandmarkDetector instance
++     * @brief Set the pointer to the MouseCursorTracker instance
 +     *
-+     * @param[in] detector : Pointer to FacialLandmarkDetector instance
++     * @param[in] tracker : Pointer to MouseCursorTracker instance
 +     */
-+    void SetFacialLandmarkDetector(FacialLandmarkDetector *detector);
++    void SetTracker(MouseCursorTracker *tracker);
 +
  protected:
      /**
@@ -692,13 +675,13 @@ diff -pruN --exclude build ./demo_clean/src/LAppModel.hpp ./demo_dev/src/LAppMod
  
      Csm::Rendering::CubismOffscreenFrame_OpenGLES2 _renderBuffer;   ///< フレームバッファ以外の描画先
 +
-+    FacialLandmarkDetector *_detector;
++    MouseCursorTracker *_tracker;
  };
  
  
 diff -pruN --exclude build ./demo_clean/src/LAppPal.cpp ./demo_dev/src/LAppPal.cpp
---- ./demo_clean/src/LAppPal.cpp	2020-09-27 17:43:12.081477263 +0100
-+++ ./demo_dev/src/LAppPal.cpp	2020-07-11 23:29:09.084910139 +0100
+--- ./demo_clean/src/LAppPal.cpp	2020-10-02 02:01:04.829787750 +0100
++++ ./demo_dev/src/LAppPal.cpp	2020-10-01 22:47:24.722848453 +0100
 @@ -6,6 +6,7 @@
   */
  
@@ -720,8 +703,8 @@ diff -pruN --exclude build ./demo_clean/src/LAppPal.cpp ./demo_dev/src/LAppPal.c
      }
      file.read(buf, size);
 diff -pruN --exclude build ./demo_clean/src/LAppTextureManager.cpp ./demo_dev/src/LAppTextureManager.cpp
---- ./demo_clean/src/LAppTextureManager.cpp	2020-09-27 17:43:12.085477268 +0100
-+++ ./demo_dev/src/LAppTextureManager.cpp	2020-07-11 22:22:18.004965003 +0100
+--- ./demo_clean/src/LAppTextureManager.cpp	2020-10-02 02:01:04.833787812 +0100
++++ ./demo_dev/src/LAppTextureManager.cpp	2020-10-01 22:47:24.654849690 +0100
 @@ -96,6 +96,46 @@ LAppTextureManager::TextureInfo* LAppTex
  
  }
@@ -770,8 +753,8 @@ diff -pruN --exclude build ./demo_clean/src/LAppTextureManager.cpp ./demo_dev/sr
  {
      for (Csm::csmUint32 i = 0; i < _textures.GetSize(); i++)
 diff -pruN --exclude build ./demo_clean/src/LAppTextureManager.hpp ./demo_dev/src/LAppTextureManager.hpp
---- ./demo_clean/src/LAppTextureManager.hpp	2020-09-27 17:43:12.069477246 +0100
-+++ ./demo_dev/src/LAppTextureManager.hpp	2020-07-11 17:36:31.180131039 +0100
+--- ./demo_clean/src/LAppTextureManager.hpp	2020-10-02 02:01:04.825787688 +0100
++++ ./demo_dev/src/LAppTextureManager.hpp	2020-10-01 22:47:24.786847290 +0100
 @@ -72,6 +72,8 @@ public:
      */
      TextureInfo* CreateTextureFromPngFile(std::string fileName);
@@ -782,8 +765,8 @@ diff -pruN --exclude build ./demo_clean/src/LAppTextureManager.hpp ./demo_dev/sr
      * @brief 画像の解放
      *
 diff -pruN --exclude build ./demo_clean/src/LAppView.cpp ./demo_dev/src/LAppView.cpp
---- ./demo_clean/src/LAppView.cpp	2020-09-27 17:43:12.085477268 +0100
-+++ ./demo_dev/src/LAppView.cpp	2020-07-11 17:38:06.905451955 +0100
+--- ./demo_clean/src/LAppView.cpp	2020-10-02 02:01:04.833787812 +0100
++++ ./demo_dev/src/LAppView.cpp	2020-10-01 22:47:24.602850636 +0100
 @@ -13,7 +13,6 @@
  #include "LAppLive2DManager.hpp"
  #include "LAppTextureManager.hpp"
@@ -959,8 +942,8 @@ diff -pruN --exclude build ./demo_clean/src/LAppView.cpp ./demo_dev/src/LAppView
 -    }
  }
 diff -pruN --exclude build ./demo_clean/src/LAppView.hpp ./demo_dev/src/LAppView.hpp
---- ./demo_clean/src/LAppView.hpp	2020-09-27 17:43:12.069477246 +0100
-+++ ./demo_dev/src/LAppView.hpp	2020-07-11 17:38:25.541708705 +0100
+--- ./demo_clean/src/LAppView.hpp	2020-10-02 02:01:04.825787688 +0100
++++ ./demo_dev/src/LAppView.hpp	2020-10-01 22:47:24.802846999 +0100
 @@ -14,7 +14,6 @@
  #include "CubismFramework.hpp"
  #include <Rendering/OpenGL/CubismOffscreenSurface_OpenGLES2.hpp>
@@ -1015,9 +998,9 @@ diff -pruN --exclude build ./demo_clean/src/LAppView.hpp ./demo_dev/src/LAppView
      // レンダリング先を別ターゲットにする方式の場合に使用
      LAppSprite* _renderSprite;                                  ///< モードによっては_renderBufferのテクスチャを描画
 diff -pruN --exclude build ./demo_clean/src/main.cpp ./demo_dev/src/main.cpp
---- ./demo_clean/src/main.cpp	2020-09-27 17:43:12.069477246 +0100
-+++ ./demo_dev/src/main.cpp	2020-07-12 15:06:29.194034887 +0100
-@@ -5,18 +5,156 @@
+--- ./demo_clean/src/main.cpp	2020-10-02 02:01:04.825787688 +0100
++++ ./demo_dev/src/main.cpp	2020-10-01 23:42:12.845205308 +0100
+@@ -5,18 +5,154 @@
   * that can be found at https://www.live2d.com/eula/live2d-open-software-license-agreement_en.html.
   */
  
@@ -1033,10 +1016,9 @@ diff -pruN --exclude build ./demo_clean/src/main.cpp ./demo_dev/src/main.cpp
 +namespace fs = std::experimental::filesystem;
 +#endif
 +
-+
  #include "LAppDelegate.hpp"
 +#include "LAppLive2DManager.hpp"
-+#include "facial_landmark_detector.h"
++#include "mouse_cursor_tracker.h"
 +
 +struct CmdArgs
 +{
@@ -1048,7 +1030,7 @@ diff -pruN --exclude build ./demo_clean/src/main.cpp ./demo_dev/src/main.cpp
 +    float translateX;
 +    float translateY;
 +    std::string modelName;
-+    std::string cfgPath; // Path to config file for FacialLandmarkDetector
++    std::string cfgPath; // Path to config file for MouseCursorTracker
 +};
 +
 +CmdArgs parseArgv(int argc, char *argv[])
@@ -1058,7 +1040,7 @@ diff -pruN --exclude build ./demo_clean/src/main.cpp ./demo_dev/src/main.cpp
 +    // Set default values
 +    cmdArgs.windowWidth = 600;
 +    cmdArgs.windowHeight = 600;
-+    cmdArgs.windowTitle = "FacialLandmarksForCubism example";
++    cmdArgs.windowTitle = "MouseTrackerForCubism example";
 +    cmdArgs.rootDir = fs::current_path();
 +    cmdArgs.scaleFactor = 8.0f;
 +    cmdArgs.translateX = 0.0f;
@@ -1158,10 +1140,9 @@ diff -pruN --exclude build ./demo_clean/src/main.cpp ./demo_dev/src/main.cpp
 -    LAppDelegate::GetInstance()->Run();
 +    delegate->SetRootDirectory(cmdArgs.rootDir);
 +
-+    FacialLandmarkDetector detector(cmdArgs.cfgPath);
++    MouseCursorTracker tracker(cmdArgs.cfgPath);
 +
-+    std::thread detectorThread(&FacialLandmarkDetector::mainLoop,
-+                               &detector);
++    std::thread trackerThread(&MouseCursorTracker::mainLoop, &tracker);
 +
 +    LAppLive2DManager *manager = LAppLive2DManager::GetInstance();
 +    manager->SetModel(cmdArgs.modelName);
@@ -1169,12 +1150,12 @@ diff -pruN --exclude build ./demo_clean/src/main.cpp ./demo_dev/src/main.cpp
 +    manager->SetProjectionScaleTranslate(cmdArgs.scaleFactor,
 +                                         cmdArgs.translateX,
 +                                         cmdArgs.translateY);
-+    manager->SetFacialLandmarkDetector(&detector);
++    manager->SetTracker(&tracker);
 +
 +    delegate->Run();
 +
-+    detector.stop();
-+    detectorThread.join();
++    tracker.stop();
++    trackerThread.join();
  
      return 0;
  }

@@ -1,14 +1,20 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(FacialLandmarksForCubism_project)
+project(MouseTrackerForCubism_project)
 
-add_subdirectory(lib/dlib/dlib dlib_build)
-find_package(OpenCV REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS})
+find_library(xdo_LIBS NAMES xdo libxdo PATHS /usr/lib REQUIRED)
+find_library(pulse_LIBS NAMES pulse PATHS /usr/lib REQUIRED)
 
-add_library(FacialLandmarksForCubism STATIC src/facial_landmark_detector.cpp)
-set_target_properties(FacialLandmarksForCubism PROPERTIES PUBLIC_HEADER include/facial_landmark_detector.h)
+include_directories(include)
 
-target_include_directories(FacialLandmarksForCubism PRIVATE include lib/dlib)
-target_link_libraries(FacialLandmarksForCubism ${OpenCV_LIBS} dlib::dlib)
+add_library(
+    MouseTrackerForCubism STATIC
+    src/mouse_cursor_tracker.cpp
+)
 
+set_target_properties(
+    MouseTrackerForCubism PROPERTIES PUBLIC_HEADER
+    include/mouse_cursor_tracker.h
+)
+
+target_link_libraries(MouseTrackerForCubism ${xdo_LIBS} ${pulse_LIBS} pulse-simple)
