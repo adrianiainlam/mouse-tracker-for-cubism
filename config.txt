@@ -7,7 +7,7 @@ sleep_ms 5
 # Automatic functionality in Live2D
 autoBlink 1
 autoBreath 1
-randomMotion 0
+randomIdleMotion 1
 useLipSync 1
 
 # Lip sync configurations
@@ -39,12 +39,12 @@ mouthForm 0
 # If you have multiple screens, select the ID of the one you want to track.
 screen 0
 
-# The "middle" position, i.e. the coordinates of the cursor where
+# The "origin" position, i.e. the coordinates of the cursor where
 # the Live2D model will be looking straight ahead.
 # For a 1920x1080 screen, {1600, 870} will be somewhere near the
 # bottom right corner.
-middle_x 1600
-middle_y 870
+origin_x 1600
+origin_y 870
 
 # The bounding box. These are the limits of the coordinates where the
 # Live2D model will be looking 30 degrees to each side.

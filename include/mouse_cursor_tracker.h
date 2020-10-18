@@ -26,8 +26,11 @@ SOFTWARE.
 ****/
 
 #include <string>
-#include <map>
 #include <thread>
+#include <vector>
+#include <utility>
+#include <mutex>
+#include <map>
 extern "C"
 {
 #include <xdo.h>
@@ -37,28 +40,38 @@ extern "C"
 class MouseCursorTracker
 {
 public:
-    MouseCursorTracker(std::string cfgPath);
+    MouseCursorTracker(std::string cfgPath,
+                       std::vector<std::pair<std::string, int> > motions = {},
+                       std::vector<std::string> expressions = {});
     ~MouseCursorTracker();
+
+    enum class MotionPriority
+    {
+        // See LAppDefine.cpp in Demo
+        none,
+        idle,
+        normal,
+        force
+    };
 
     struct Params
     {
-        double leftEyeOpenness;
-        double rightEyeOpenness;
-        double leftEyeSmile;
-        double rightEyeSmile;
-        double mouthOpenness;
-        double mouthForm;
-        double faceXAngle;
-        double faceYAngle;
-        double faceZAngle;
+        std::map<std::string, double> live2d;
+
         bool autoBlink;
         bool autoBreath;
-        bool randomMotion;
+        bool randomIdleMotion;
         bool useLipSync;
         double lipSyncParam;
+
+        MotionPriority motionPriority;
+        std::string motionGroup;
+        int motionNumber;
+
+        std::string expression;
     };
 
-    Params getParams(void) const;
+    Params getParams(void);
 
     void stop(void);
 
@@ -76,7 +89,7 @@ private:
         int sleepMs;
         bool autoBlink;
         bool autoBreath;
-        bool randomMotion;
+        bool randomIdleMotion;
         bool useLipSync;
         double lipSyncGain;
         double lipSyncCutOff;
@@ -87,8 +100,10 @@ private:
         int left;
         int right;
         int screen;
-        Coord middle;
+        Coord origin;
     } m_cfg;
+
+    std::map<std::string, double> m_overrideMap;
 
     bool m_stop;
 
@@ -97,9 +112,18 @@ private:
     xdo_t *m_xdo;
 
     std::thread m_getVolumeThread;
+    std::thread m_parseCommandThread;
     void audioLoop(void);
+    void cliLoop(void);
+    void processCommand(std::string);
     double m_currentVol;
     pa_simple *m_pulse;
+
+    MotionPriority m_motionPriority;
+    std::string m_motionGroup;
+    int m_motionNumber;
+    std::mutex m_motionMutex;
+    std::string m_expression;
 
     void populateDefaultConfig(void);
     void parseConfig(std::string cfgPath);

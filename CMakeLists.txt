@@ -4,6 +4,7 @@ project(MouseTrackerForCubism_project)
 
 find_library(xdo_LIBS NAMES xdo libxdo PATHS /usr/lib REQUIRED)
 find_library(pulse_LIBS NAMES pulse PATHS /usr/lib REQUIRED)
+find_library(readline_LIBS NAMES readline libreadline /usr/lib REQUIRED)
 
 include_directories(include)
 
@@ -17,4 +18,4 @@ set_target_properties(
     include/mouse_cursor_tracker.h
 )
 
-target_link_libraries(MouseTrackerForCubism ${xdo_LIBS} ${pulse_LIBS} pulse-simple)
+target_link_libraries(MouseTrackerForCubism ${xdo_LIBS} ${pulse_LIBS} pulse-simple ${readline_LIBS})
