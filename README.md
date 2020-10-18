@@ -31,12 +31,12 @@ if you don't have C++17 support.
 1. Install dependencies.
 
    You will require a recent C/C++ compiler, `make`, `patch`, CMake >= 3.16,
-   libxdo, and PulseAudio. To compile the example
+   libxdo, PulseAudio, and readline. To compile the example
    program you will also require the OpenGL library (and its dev headers)
    among other libraries required for the example program. The libraries I
    had to install (this list may not be exhaustive) are:
 
-       libxdo-dev libpulse-dev libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libglu1-mesa-dev
+       libxdo-dev libpulse-dev libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libglu1-mesa-dev libreadline-dev
 
 2. Clone this repository
 
