@@ -1,0 +1,3 @@
+[submodule "lib/editline"]
+	path = lib/editline
+	url = https://github.com/troglobit/editline.git

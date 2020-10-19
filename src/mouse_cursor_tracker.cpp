@@ -41,8 +41,8 @@ extern "C"
 {
 #include <xdo.h>
 #include <pulse/simple.h>
-#include <readline/readline.h>
-#include <readline/history.h>
+#include <string.h> // strdup
+#include "editline.h"
 }
 #include "mouse_cursor_tracker.h"
 
@@ -146,10 +146,9 @@ std::vector<std::pair<std::string, int> > MCT_motions;
 std::vector<std::string> MCT_expressions;
 std::map<std::string, double> *MCT_overrideMap;
 
-static char **cliCompletionFunction(const char *textCStr, int start, int end)
+static int cliListPossible(char *token, char ***av)
 {
     // Reference: https://github.com/eliben/code-for-blog/blob/master/2016/readline-samples/readline-complete-subcommand.cpp
-    rl_attempted_completion_over = 1;
 
     std::string line(rl_line_buffer);
 
@@ -193,6 +192,7 @@ static char **cliCompletionFunction(const char *textCStr, int start, int end)
                 {
                     constructed.push_back(std::to_string(i));
                 }
+                break; // No need to loop through the list, all motions have the same set of priorities
             }
         }
 
@@ -222,10 +222,10 @@ static char **cliCompletionFunction(const char *textCStr, int start, int end)
 
     if (!vocab)
     {
-        return nullptr;
+        return 0;
     }
 
-    std::string text(textCStr);
+    std::string text(token);
     std::vector<std::string> matches;
     std::copy_if(vocab->begin(), vocab->end(), std::back_inserter(matches),
                  [&text](const std::string &s)
@@ -234,20 +234,48 @@ static char **cliCompletionFunction(const char *textCStr, int start, int end)
                              s.compare(0, text.size(), text) == 0);
                  });
 
-    if (matches.empty())
+    *av = static_cast<char **>(malloc(matches.size() * sizeof (**av)));
+    if (!*av) return 0;
+    for (std::size_t i = 0; i < matches.size(); i++)
     {
-        return nullptr;
+        (*av)[i] = strdup(matches[i].c_str());
+    }
+    return matches.size();
+}
+
+static char *cliComplete(char *token, int *match)
+{
+    char **av;
+    int numMatches = cliListPossible(token, &av);
+
+    *match = 0;
+    if (numMatches == 0) return nullptr;
+
+    std::vector<std::string> list;
+
+    for (std::size_t i = 0; i < numMatches; i++)
+    {
+        list.push_back(std::string(av[i]));
+        free(av[i]);
+    }
+    free(av);
+
+    if (numMatches == 1)
+    {
+        *match = 1;
+        std::string result = list[0] + " ";
+        return strdup(result.c_str() + strlen(token));
     }
 
-    char** array =
-        static_cast<char**>(malloc((2 + matches.size()) * sizeof(*array)));
-    array[0] = strdup(longest_common_prefix(text, matches).c_str());
-    size_t ptr = 1;
-    for (const auto& m : matches) {
-        array[ptr++] = strdup(m.c_str());
+    std::string lcp = longest_common_prefix(token, list);
+
+    if (lcp.size() > strlen(token))
+    {
+        *match = 1;
+        return strdup(lcp.c_str() + strlen(token));
     }
-    array[ptr] = nullptr;
-    return array;
+
+    return nullptr;
 }
 
 MouseCursorTracker::MouseCursorTracker(std::string cfgPath,
@@ -303,8 +331,8 @@ void MouseCursorTracker::audioLoop(void)
 
 void MouseCursorTracker::cliLoop(void)
 {
-    rl_catch_signals = 0;
-    rl_attempted_completion_function = cliCompletionFunction;
+    rl_set_complete_func(&cliComplete);
+    rl_set_list_possib_func(&cliListPossible);
     while (!m_stop)
     {
         char *buf = readline(">> ");
@@ -430,8 +458,6 @@ void MouseCursorTracker::processCommand(std::string cmdline)
                 {
                     std::cerr << "std::stod failed" << std::endl;
                 }
-
-                std::cerr << "Debug: setting " << cmdSplit[i] << std::endl;
             }
         }
         else if (cmdSplit[0] == "clear")

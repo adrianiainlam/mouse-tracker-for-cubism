@@ -31,16 +31,16 @@ if you don't have C++17 support.
 1. Install dependencies.
 
    You will require a recent C/C++ compiler, `make`, `patch`, CMake >= 3.16,
-   libxdo, PulseAudio, and readline. To compile the example
+   libxdo, and PulseAudio. To compile the example
    program you will also require the OpenGL library (and its dev headers)
    among other libraries required for the example program. The libraries I
    had to install (this list may not be exhaustive) are:
 
-       libxdo-dev libpulse-dev libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libglu1-mesa-dev libreadline-dev
+       libxdo-dev libpulse-dev libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libglu1-mesa-dev
 
-2. Clone this repository
+2. Clone this repository including its submodule (editline)
 
-       git clone https://github.com/adrianiainlam/mouse-tracker-for-cubism.git
+       git clone --recurse-submodules https://github.com/adrianiainlam/mouse-tracker-for-cubism.git
 
 3. To build the library only: (Skip this step if you want to build the example
    program. It will be done automatically.)
@@ -68,6 +68,17 @@ To build the example program:
 6. Go back to the "example" directory and run
 
        ./build.sh
+
+   Note: I have observed that sometimes, on the first build, a failure
+   will be reported, such as:
+
+       [ 98%] Completed 'editline'
+       [ 98%] Built target editline
+       Makefile:149: recipe for target 'all' failed
+       make: *** [all] Error 2
+
+   I have no idea why, but seems like running build.sh again solves the
+   issue. Please open an issue / contact me if not.
 
 7. Now try running the example program. From the "example" directory:
 
@@ -118,6 +129,18 @@ I refer to the following files that I have provided under this repo:
 
 The license text can be found in LICENSE-MIT.txt, and also at the top of
 the .cpp and .h files.
+
+This library depends on "editline" which is included here as a git
+submodule. The fork used here was originally written by Simmule
+Turner and Rick Salz, made available under the Spencer License 94,
+now maintained by Joachim Wiberg. See "lib/editline/LICENSE" for more
+information.
+
+(Note: An earlier version of this library linked to GNU Readline as
+a dependency. I have made a mistake and assumed GNU Readline was LGPL,
+when in fact it was GPL. This has been corrected within 24 hours, by
+replacing GNU Readline with editline instead. I apologize to the
+copyright holders of GNU Readline.)
 
 The example program is a patched version of the sample program provided
 by Live2D (because there's really no point in reinventing the wheel),
