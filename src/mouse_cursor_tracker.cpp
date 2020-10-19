@@ -753,7 +753,7 @@ void MouseCursorTracker::populateDefaultConfig(void)
     m_cfg.sleepMs = 5;
     m_cfg.autoBlink = true;
     m_cfg.autoBreath = true;
-    m_cfg.randomIdleMotion = false;
+    m_cfg.randomIdleMotion = true;
     m_cfg.useLipSync = true;
     m_cfg.lipSyncGain = 10;
     m_cfg.lipSyncCutOff = 0.15;
