@@ -5,6 +5,9 @@ project(MouseTrackerForCubism_project)
 find_library(xdo_LIBS NAMES xdo PATHS /usr/lib REQUIRED)
 find_library(pulse_LIBS NAMES pulse PATHS /usr/lib REQUIRED)
 
+find_package(PkgConfig)
+pkg_check_modules(GTKMM gtkmm-3.0)
+
 include(ExternalProject)
 ExternalProject_Add(editline
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/editline/src
@@ -15,11 +18,12 @@ ExternalProject_Add(editline
 ExternalProject_Get_Property(editline install_dir)
 set(editline_INSTALL_DIR ${install_dir})
 
-include_directories(include ${CMAKE_CURRENT_SOURCE_DIR}/lib/editline/include)
+include_directories(include ${CMAKE_CURRENT_SOURCE_DIR}/lib/editline/include ${GTKMM_INCLUDE_DIRS})
 
 add_library(
     MouseTrackerForCubism STATIC
     src/mouse_cursor_tracker.cpp
+    src/mouse_cursor_tracker_gui.cpp
 )
 
 set_target_properties(
@@ -27,4 +31,4 @@ set_target_properties(
     include/mouse_cursor_tracker.h
 )
 
-target_link_libraries(MouseTrackerForCubism ${xdo_LIBS} ${pulse_LIBS} pulse-simple ${editline_INSTALL_DIR}/lib/libeditline.a)
+target_link_libraries(MouseTrackerForCubism ${xdo_LIBS} ${pulse_LIBS} pulse-simple ${editline_INSTALL_DIR}/lib/libeditline.a ${GTKMM_LIBRARIES})

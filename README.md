@@ -31,12 +31,12 @@ if you don't have C++17 support.
 1. Install dependencies.
 
    You will require a recent C/C++ compiler, `make`, `patch`, CMake >= 3.16,
-   libxdo, and PulseAudio. To compile the example
+   libxdo, PulseAudio, and a stable version of gtkmm 3. To compile the example
    program you will also require the OpenGL library (and its dev headers)
    among other libraries required for the example program. The libraries I
    had to install (this list may not be exhaustive) are:
 
-       libxdo-dev libpulse-dev libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libglu1-mesa-dev
+       libxdo-dev libpulse-dev libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libglu1-mesa-dev libgtkmm-3.0-dev
 
 2. Clone this repository including its submodule (editline)
 
@@ -123,7 +123,9 @@ The library itself is provided under the MIT license. By "the library itself"
 I refer to the following files that I have provided under this repo:
 
  * src/mouse_cursor_tracker.cpp
- * include/mouse_cursor_tracker.cpp
+ * src/mouse_cursor_tracker_gui.cpp
+ * src/gui.glade
+ * include/mouse_cursor_tracker.h
  * and if you decide to build the binary for the library, the resulting
    binary file (typically build/libMouseTrackerForCubism.a)
 

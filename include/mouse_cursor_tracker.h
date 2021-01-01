@@ -31,6 +31,13 @@ SOFTWARE.
 #include <utility>
 #include <mutex>
 #include <map>
+#include <gtkmm/application.h>
+#include <gtkmm/builder.h>
+#include <gtkmm/scale.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/button.h>
+#include <gtkmm/window.h>
+
 extern "C"
 {
 #include <xdo.h>
@@ -113,8 +120,10 @@ private:
 
     std::thread m_getVolumeThread;
     std::thread m_parseCommandThread;
+    std::thread m_guiThread;
     void audioLoop(void);
     void cliLoop(void);
+    void guiLoop(void);
     void processCommand(std::string);
     double m_currentVol;
     pa_simple *m_pulse;
@@ -127,6 +136,22 @@ private:
 
     void populateDefaultConfig(void);
     void parseConfig(std::string cfgPath);
+
+    Glib::RefPtr<Gtk::Application> m_gtkapp;
+    Glib::RefPtr<Gtk::Builder> m_builder;
+
+    std::vector<std::string> m_onClearResettingParams;
+
+    // GUI signal handlers
+    void onMotionStartButton(void);
+    void onExpressionStartButton(void);
+    void onParamUpdateButton(Gtk::Scale *scale, bool isInc);
+    void onParamValChanged(Glib::RefPtr<Gtk::Adjustment> adj, std::string paramName);
+    void onAutoToggle(Gtk::CheckButton *check, Gtk::Scale *scale,
+                      Gtk::Button *buttonDec, Gtk::Button *buttonInc,
+                      std::string paramName);
+    void onClearButton(Glib::RefPtr<Gtk::Button> button, std::string paramName, Glib::RefPtr<Gtk::Adjustment> adj);
+    void onExpanderChange(Gtk::Window *window);
 };
 
 #endif

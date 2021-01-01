@@ -1,6 +1,6 @@
 diff -pruN --exclude build ./demo_clean/CMakeLists.txt ./demo_dev/CMakeLists.txt
 --- ./demo_clean/CMakeLists.txt	2020-10-01 22:47:25.846828066 +0100
-+++ ./demo_dev/CMakeLists.txt	2020-10-01 23:29:15.530233484 +0100
++++ ./demo_dev/CMakeLists.txt	2021-01-01 11:11:14.995691070 +0000
 @@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16)
  # Set app name.
  set(APP_NAME Demo)
@@ -19,17 +19,19 @@ diff -pruN --exclude build ./demo_clean/CMakeLists.txt ./demo_dev/CMakeLists.txt
  set(CMAKE_CXX_STANDARD_REQUIRED ON)
  set(CMAKE_CXX_EXTENSIONS OFF)
  
-@@ -64,6 +64,9 @@ target_link_libraries(Framework Live2DCu
+@@ -64,6 +64,11 @@ target_link_libraries(Framework Live2DCu
  # Find opengl libraries.
  find_package(OpenGL REQUIRED)
  
 +# Add MouseTrackerForCubism
++find_package(PkgConfig)
++pkg_check_modules(GTKMM gtkmm-3.0)
 +add_subdirectory(../.. MouseTrackerForCubism_build)
 +
  # Make executable app.
  add_executable(${APP_NAME})
  # Add source files.
-@@ -73,9 +76,11 @@ target_link_libraries(${APP_NAME}
+@@ -73,9 +78,20 @@ target_link_libraries(${APP_NAME}
    Framework
    glfw
    ${OPENGL_LIBRARIES}
@@ -38,13 +40,22 @@ diff -pruN --exclude build ./demo_clean/CMakeLists.txt ./demo_dev/CMakeLists.txt
  )
  # Specify include directories.
 -target_include_directories(${APP_NAME} PRIVATE ${STB_PATH})
-+target_include_directories(${APP_NAME} PRIVATE ${STB_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
++target_include_directories(${APP_NAME} PRIVATE ${STB_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/../../include ${GTKMM_INCLUDE_DIRS})
++
++# Copy GUI to build directory
++add_custom_command(
++  TARGET ${APP_NAME}
++  POST_BUILD
++  COMMAND
++    ${CMAKE_COMMAND} -E
++      copy ${CMAKE_CURRENT_SOURCE_DIR}/../../src/gui.glade $<TARGET_FILE_DIR:${APP_NAME}>/gui.glade
++)
  
  # Copy resource directory to build directory.
  add_custom_command(
 diff -pruN --exclude build ./demo_clean/scripts/make_gcc ./demo_dev/scripts/make_gcc
 --- ./demo_clean/scripts/make_gcc	2020-10-01 22:47:25.854827921 +0100
-+++ ./demo_dev/scripts/make_gcc	2020-10-12 03:42:07.847955578 +0100
++++ ./demo_dev/scripts/make_gcc	2021-01-01 11:34:25.583684883 +0000
 @@ -10,4 +10,4 @@ BUILD_PATH=$SCRIPT_PATH/../build/make_gc
  cmake -S "$CMAKE_PATH" \
    -B "$BUILD_PATH" \

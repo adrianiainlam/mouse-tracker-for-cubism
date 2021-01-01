@@ -37,6 +37,8 @@ SOFTWARE.
 #include <cctype>
 #include <mutex>
 
+#include "mouse_cursor_tracker.h"
+
 extern "C"
 {
 #include <xdo.h>
@@ -44,7 +46,7 @@ extern "C"
 #include <string.h> // strdup
 #include "editline.h"
 }
-#include "mouse_cursor_tracker.h"
+
 
 static double rms(float *buf, std::size_t count)
 {
@@ -303,8 +305,11 @@ MouseCursorTracker::MouseCursorTracker(std::string cfgPath,
         throw std::runtime_error("Unable to create pulse");
     }
 
+    m_gtkapp = Gtk::Application::create();
+
     m_getVolumeThread = std::thread(&MouseCursorTracker::audioLoop, this);
     m_parseCommandThread = std::thread(&MouseCursorTracker::cliLoop, this);
+    m_guiThread = std::thread(&MouseCursorTracker::guiLoop, this);
 
     MCT_motions = motions;
     MCT_expressions = expressions;
@@ -364,7 +369,7 @@ void MouseCursorTracker::processCommand(std::string cmdline)
         {
             if (cmdSplit.size() == 1)
             {
-                std::cout << "Available commands: motion set clear\n"
+                std::cout << "Available commands: motion expression set clear\n"
                           << "Type \"help <command>\" for more help" << std::endl;
             }
             else if (cmdSplit[1] == "motion")
