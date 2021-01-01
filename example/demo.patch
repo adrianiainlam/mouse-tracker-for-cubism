@@ -1,6 +1,6 @@
 diff -pruN --exclude build ./demo_clean/CMakeLists.txt ./demo_dev/CMakeLists.txt
 --- ./demo_clean/CMakeLists.txt	2020-10-01 22:47:25.846828066 +0100
-+++ ./demo_dev/CMakeLists.txt	2021-01-01 11:11:14.995691070 +0000
++++ ./demo_dev/CMakeLists.txt	2021-01-01 15:36:14.720039779 +0000
 @@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16)
  # Set app name.
  set(APP_NAME Demo)
@@ -18,6 +18,15 @@ diff -pruN --exclude build ./demo_clean/CMakeLists.txt ./demo_dev/CMakeLists.txt
 +set(CMAKE_CXX_STANDARD 17)
  set(CMAKE_CXX_STANDARD_REQUIRED ON)
  set(CMAKE_CXX_EXTENSIONS OFF)
+ 
+@@ -42,7 +42,7 @@ add_library(Live2DCubismCore STATIC IMPO
+ # Find library path.
+ set_target_properties(Live2DCubismCore
+   PROPERTIES
+-    IMPORTED_LOCATION ${CORE_PATH}/lib/linux/x86_64/libLive2DCubismCore.a
++    IMPORTED_LOCATION ${CORE_PATH}/lib/experimental/rpi/libLive2DCubismCore.a
+     INTERFACE_INCLUDE_DIRECTORIES ${CORE_PATH}/include
+ )
  
 @@ -64,6 +64,11 @@ target_link_libraries(Framework Live2DCu
  # Find opengl libraries.
