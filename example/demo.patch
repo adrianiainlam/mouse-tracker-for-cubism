@@ -1,7 +1,10 @@
 diff -pruN --exclude build ./demo_clean/CMakeLists.txt ./demo_dev/CMakeLists.txt
---- ./demo_clean/CMakeLists.txt	2020-10-01 22:47:25.846828066 +0100
-+++ ./demo_dev/CMakeLists.txt	2021-01-01 15:36:14.720039779 +0000
-@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16)
+--- ./demo_clean/CMakeLists.txt	2021-01-13 16:58:08.359828681 +0000
++++ ./demo_dev/CMakeLists.txt	2021-01-13 17:22:01.166356692 +0000
+@@ -1,9 +1,9 @@
+-cmake_minimum_required(VERSION 3.16)
++cmake_minimum_required(VERSION 3.13)
+ 
  # Set app name.
  set(APP_NAME Demo)
  # Set directory paths.
