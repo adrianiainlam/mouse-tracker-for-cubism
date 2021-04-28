@@ -53,14 +53,14 @@ To build the example program:
 4. Download "Cubism 4 SDK for Native R1" from the Live2D website:
    <https://www.live2d.com/en/download/cubism-sdk/download-native/>.
 
-   Extract the archive -- put the "CubismSdkForNative-4-r.1" folder under
+   Extract the archive -- put the "CubismSdkForNative-4-r.2" folder under
    the "example" folder of this repo.
 
    Note: The Cubism SDK is the property of Live2D and is not part of this
    project. You must agree to Live2D's license agreements to use it.
 
 5. Go into the
-   "example/CubismSdkForNative-4-r.1/Samples/OpenGL/thirdParty/scripts"
+   "example/CubismSdkForNative-4-r.2/Samples/OpenGL/thirdParty/scripts"
    directory and run
 
        ./setup_glew_glfw
@@ -103,6 +103,9 @@ for the Facial Landmarks for Cubism library.
  * `--translate-y`, `-y`: Vertical translation of the model within the window
  * `--model`, `-m`: Name of the model to be used. This must be located inside
    the "Resources" folder.
+ * `--old-param-id`, `-o`: If set to 1, translate new (Cubism 3+) parameter
+   IDs to old (Cubism 2.1) IDs. This is necessary, for example, for
+   [the Chitose model available from Live2D](https://www.live2d.com/en/download/sample-data/).
  * `--config`, `-c`: Path to the configuration file for the Mouse Tracker
    for Cubism library. See below for more details.
 
