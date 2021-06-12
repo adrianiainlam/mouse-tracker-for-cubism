@@ -1,6 +1,6 @@
 diff -pruN --exclude build ./demo_clean/CMakeLists.txt ./demo_dev/CMakeLists.txt
 --- ./demo_clean/CMakeLists.txt	2021-02-17 01:23:17.000000000 +0000
-+++ ./demo_dev/CMakeLists.txt	2021-04-28 12:32:48.468744883 +0100
++++ ./demo_dev/CMakeLists.txt	2021-06-12 17:14:36.877121318 +0100
 @@ -1,9 +1,9 @@
 -cmake_minimum_required(VERSION 3.16)
 +cmake_minimum_required(VERSION 3.13)
@@ -9,7 +9,7 @@ diff -pruN --exclude build ./demo_clean/CMakeLists.txt ./demo_dev/CMakeLists.txt
  set(APP_NAME Demo)
  # Set directory paths.
 -set(SDK_ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../../..)
-+set(SDK_ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../CubismSdkForNative-4-r.2)
++set(SDK_ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../CubismSdkForNative-4-r.3)
  set(CORE_PATH ${SDK_ROOT_PATH}/Core)
  set(FRAMEWORK_PATH ${SDK_ROOT_PATH}/Framework)
  set(THIRD_PARTY_PATH ${SDK_ROOT_PATH}/Samples/OpenGL/thirdParty)
